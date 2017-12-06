@@ -90,19 +90,35 @@ uint8_t rnd()
 
 #define DATAWHEEL (1)
 
+// There are no real time constraints here, this is an idle loop after
+// all...
 void loop()
 {
-  static uint8_t adcNum=0;                // declared as static to limit variable scope
-  static uint8_t waveSelect;
-  uint16_t  adcVal = analogRead(adcNum);  // Get the next adc value
+  static uint8_t  adcNum=0;                // declared as static to limit variable scope
+  static uint8_t  waveSelect;
+  uint16_t        adcVal = analogRead(adcNum);  // Get the next adc value
+  static uint8_t  perturb = 0;
+  static uint8_t  ws=0;
+
   switch(adcNum)
   {
     case 0: // reduced range ~ 512-1023
       break;
     case 1:
+      // Perturb the main waveform randomly, but with a degree
+      // of control
+      if (--perturb == 0)
+      {
+        perturb = rnd();
+        if (perturb > (adcVal >> 2)) // shift adcVal into 8 bit range
+        {
+          ws = perturb;
+          //phase = 0;
+        }
+      }
       break;
     case 2:
-      waveSelect = adcVal >> 7;                             // gives us 0-7
+      waveSelect = (ws + (adcVal >> 7)) & 0x07;          // gives us 0-7
       wave1 = waves[waveSelect >> 1];                       // 0-3
       wave2 = waves[(waveSelect >> 1) + (waveSelect & 1)];  // 0-4
       break;
@@ -123,9 +139,7 @@ void loop()
   ADCSRA |= _BV(ADSC);  // ADCSRAVAL;
 }
 
-uint8_t state;
 // deal with oscillator
-
 ISR(TIM0_COMPA_vect)
 {
   // increment the phase counter
