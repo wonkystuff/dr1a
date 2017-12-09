@@ -1,4 +1,4 @@
-#include "calc.h"
+ #include "calc.h"
 #define NUM_ADCS (4)
 
 // Base-timer is running at 8MHz
@@ -27,7 +27,9 @@ const uint8_t     *waves[5];  // choice of wavetable
 const uint8_t     *wave1;     // which wavetable will this oscillator use?
 const uint8_t     *wave2;     // which wavetable will this oscillator use?
 uint16_t          phase;      // The accumulated phase (distance through the wavetable)
-uint16_t          pi;         // current phase increment (how much phase will increase per sample)
+uint16_t          pi;         // wavetable current phase increment (how much phase will increase per sample)
+uint16_t          phase_sync; // The accumulated phase of the (virtual) sync oscillator (distance through the wavetable)
+uint16_t          pi_sync;    // sync oscillator current phase increment (how much phase will increase per sample)
 
 void setup()
 {
@@ -75,6 +77,7 @@ void setup()
   pinMode(PB0, OUTPUT);       // signalling pin
 
   pi = 1;
+  pi_sync = 1;
 }
 
 
@@ -103,24 +106,28 @@ void loop()
   switch(adcNum)
   {
     case 0: // reduced range ~ 512-1023
-      break;
-    case 1:
+      
       // Perturb the main waveform randomly, but with a degree
       // of control
-      if (--perturb == 0)
-      {
-        perturb = rnd();
-        if (perturb > (adcVal >> 2)) // shift adcVal into 8 bit range
+      if (adcVal > 768) {
+        if (--perturb == 0)
         {
-          ws = perturb;
-          //phase = 0;
+          perturb = rnd();
+          if (perturb < (adcVal-768)) // shift adcVal into 8 bit range
+          {
+            ws = perturb;
+            //phase = 0;
+          }
         }
       }
       break;
-    case 2:
+    case 1:
       waveSelect = (ws + (adcVal >> 7)) & 0x07;          // gives us 0-7
       wave1 = waves[waveSelect >> 1];                       // 0-3
       wave2 = waves[(waveSelect >> 1) + (waveSelect & 1)];  // 0-4
+      break;
+    case 2:
+      pi_sync = pgm_read_word(&octaveLookup[adcVal]);
       break;
     case 3:
       pi = pgm_read_word(&octaveLookup[adcVal]);
@@ -144,6 +151,14 @@ ISR(TIM0_COMPA_vect)
 {
   // increment the phase counter
   phase += pi;
+
+  uint16_t old_sync = phase_sync;
+  phase_sync += pi_sync;
+  if (phase_sync < old_sync)
+  {
+    phase = 0;
+  }
+
   // By shifting the 16 bit number by 6, we are left with a number
   // in the range 0-1023 (0-0x3ff)
   uint16_t p = (phase) >> FRACBITS;
