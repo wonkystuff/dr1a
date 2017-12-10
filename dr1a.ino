@@ -149,6 +149,9 @@ void loop()
 // deal with oscillator
 ISR(TIM0_COMPA_vect)
 {
+  // useful debug indicator to see if the sample rate is correct
+  // PORTB ^= 1;
+  
   // increment the phase counter
   phase += pi;
 
