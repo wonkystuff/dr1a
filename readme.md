@@ -32,7 +32,9 @@ description not to be necessary here…
 
 ADC1 is used, and this shares a pin with `reset`. If the
 reset functionality is enabled then this ADC channel only
-has half of the range of the other channels. If you are not
-using a 'high voltage' programmer, then this is likely to
-be the case. There are notes with the *core1* board about
-this!
+has half of the range of the other channels.
+
+If you are not using a 'high voltage' programmer, then this
+is likely to be the case and R4 should be used. In the case
+that a high-voltage programmer is being used, the reset pin
+can be disabled and R4 replaced by a wire link. 
