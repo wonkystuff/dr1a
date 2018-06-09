@@ -1,28 +1,32 @@
 # dr1.a
 
-*dr1.a* is the first _real_ audio generator project, designed to be used by Orlando Ferguson for the first gig in their third phase. Since this is a further development of *single*, it shares some features:
+*dr1.a* is the first _real_ audio generator project, designed to be used by Orlando Ferguson for the first gig in their third phase.
+It is a further development of *single*, and shares the following features:
 
 * multiple selectable waveshapes (via ADC1);
+* PWM output (via OC1A);
 * 50kHz sample rate (250kHz PWM);
 
 In addition:
 
 * _Perturbation Control_: introduces a random switching of wavetable (amount is varied by a control connected to ADC0);
-* _Hard Sync_: The oscillator is periodically hard-reset to phase 0, with independent control of both frequencies (this can generate some quite brutal discontinuities, so lots of high harmonics generated. Can sound a bit like a filter sweep (frequency controls connected to ADC2 and ADC3);
+* _Hard Sync_: The fundamental oscillator is periodically hard-reset to phase 0, with independent control of both fundamental
+and sync frequencies (ADC3 and ADC2 respectively). This can generate some quite brutal discontinuities, so lots of high
+harmonics generated.
 
 ## Source layout
 
-The project consists of a set of files, one of which is generated:
+The project consists of a set of files, two of which are generated:
 
 * **Generator *(calc.rb)*:** The code generator is
 written in Ruby. The generated
-code contains stuff like the wavetables and octave-lookup
+code (calc.ino/calc.c/calc.h) contains stuff like the wavetables and octave-lookup
 information (stuff that is easily described mathematically
 but you really don't want to type in). Basically, don't edit
 the generated code directly, otherwise it will be overwritten
 next time you run the generator!
 
-* **Program *(dr1a.ino)*:** This is an arduino-file, and
+* **Program *(dr1a.ino/main.c)*:** This is an arduino-file, and
 contains three basic blocks: setup, loop and interrupt
 routine. The sound output is done in the interrupt. I hope
 that I've put sufficient comments in the code for a
