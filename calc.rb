@@ -30,7 +30,12 @@ OCTSTEPS=128
 OCTS=(DACRANGE/OCTSTEPS)
 
 File.open("#{OUTFILEROOT}.h",'w') do |f|
-  f.puts "#include \"arduino.h\"\n"
+  f.puts "#include <stdint.h>"
+  f.puts "#include <string.h>"
+  f.puts "#include <avr/sfr_defs.h>"
+  f.puts "#include <avr/io.h>"
+  f.puts "#include <avr/interrupt.h>"
+  f.puts "#include <avr/pgmspace.h>\n"
   f.puts "#define SRATE    (#{SRATE}L)"
   f.puts "#define WTSIZE   (#{WTSIZE/2}L)"
   f.puts "#define FRACBITS (#{FRACBITS}L)"
@@ -48,7 +53,7 @@ end
 # subsequent octaves are simply power-of-2 multiples of those
 # base octave values
 
-File.open("#{OUTFILEROOT}.ino",'w') do |f|
+File.open("#{OUTFILEROOT}.c",'w') do |f|
   f.puts "#include \"#{OUTFILEROOT}.h\""
   f.puts "const uint16_t octaveLookup[DACRANGE] PROGMEM = {"
 

@@ -110,7 +110,8 @@ void loop()
 
   switch(adcNum)
   {
-    case 0: // reduced range ~ 512-1023 if reset pin active
+    case 0:  // ADC 0 is on physical pin 1
+      // The reset pin is inactive here, so we can use the full range
 
       // Perturb the main waveform randomly, but with a degree
       // of control
@@ -127,15 +128,15 @@ void loop()
         }
       }
       break;
-    case 1:
+    case 1:   // ADC 1 is on physical pin 7
       waveSelect = (ws + (adcVal >> 7)) & 0x07;          // gives us 0-7
       wave1 = waves[waveSelect >> 1];                       // 0-3
       wave2 = waves[(waveSelect >> 1) + (waveSelect & 1)];  // 0-4
       break;
-    case 2:
+    case 2:   // ADC 2 is on physical pin 3
       pi_sync = pgm_read_word(&octaveLookup[adcVal]);
       break;
-    case 3:
+    case 3:   // ADC 3 is on physical pin 2
       pi = pgm_read_word(&octaveLookup[adcVal]);
       break;
   }
@@ -159,38 +160,4 @@ int main(void)
   {
     loop();
   }
-}
-
-// deal with oscillator
-ISR(TIM0_COMPA_vect)
-{
-  // useful debug indicator to see if the sample rate is correct
-  // PORTB ^= 1;
-
-  // increment the phase counter
-  phase += pi;
-
-  uint16_t old_sync = phase_sync;
-  phase_sync += pi_sync;
-  if (phase_sync < old_sync)
-  {
-    phase = 0;
-  }
-
-  // By shifting the 16 bit number by 6, we are left with a number
-  // in the range 0-1023 (0-0x3ff)
-  uint16_t p = (phase) >> FRACBITS;
-
-  // look up the output-value based on the current phase counter (truncated)
-
-  // to save wavetable space, we play the wavetable forward (first half),
-  // then backwards (and inverted)
-  uint16_t ix = p < WTSIZE ? p : ((2*WTSIZE-1) - p);
-
-  uint8_t s1 = pgm_read_byte(&wave1[ix]);
-  uint8_t s2 = pgm_read_byte(&wave2[ix]);
-  uint8_t s = s1 + s2;
-
-  // invert the wave for the second half
-  OSCOUTREG = p < WTSIZE ? -s : s;
 }
