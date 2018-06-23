@@ -1,6 +1,6 @@
 # dr1.a
 
-*dr1.a* is the first _real_ audio generator project, designed to be used by Orlando Ferguson for the first gig in their third phase.
+*dr1.a* is the first _real_ audio generator project, designed to be used by [Orlando Ferguson for the first gig in their third phase](https://youtu.be/1df9g67_uQI).
 
 Headline Features:
 * 8-bit PWM output (at 250kHz, via OC1A);
@@ -13,7 +13,7 @@ Headline Features:
 
 The project consists of a set of files, two of which are generated:
 
-* **Generator *(calc.rb)*:** The code generator is
+* **Generator *(`calc.rb`)*:** The code generator is
 written in Ruby. The generated code (`calc.ino`/`calc.h`) contains stuff like the wavetables and octave-lookup information (stuff that is easily described mathematically but you really don't want to type in). Basically, don't edit the generated code directly, otherwise it will be overwritten next time you run the generator!
 
 * **Program *(`dr1a.ino`)*:** This is an arduino-file, and contains three basic blocks: setup, loop and interrupt routine. The sound output is done in the interrupt.
