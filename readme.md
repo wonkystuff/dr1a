@@ -1,6 +1,6 @@
 # dr1.a
 
-*dr1.a* is the first _real_ audio generator project, designed to be used by Orlando Ferguson for the first gig in their third phase.
+*dr1.a* is the first _real_ audio generator project, designed to be used by [Orlando Ferguson for the first gig in their third phase](https://youtu.be/1df9g67_uQI).
 
 Headline Features:
 * 8-bit PWM output (at 250kHz, via OC1A);
