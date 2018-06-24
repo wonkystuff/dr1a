@@ -1,4 +1,25 @@
- #include "calc.h"
+/* dr1.a - firmware for a minimal drone-synth (or VCDO) for the WonkyStuff
+ * 'core1' board.
+ *
+ * Copyright (C) 2017-2018  John A. Tuffen
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Questions/queries can be directed to info@wonkystuff.net
+ */
+
+#include "calc.h"
 #define NUM_ADCS (4)
 
 // Base-timer is running at 8MHz
@@ -106,7 +127,7 @@ void loop()
   switch(adcNum)
   {
     case 0: // reduced range ~ 512-1023
-      
+
       // Perturb the main waveform randomly, but with a degree
       // of control
       if (adcVal > 768) {
@@ -132,7 +153,7 @@ void loop()
     case 3:
       pi = pgm_read_word(&octaveLookup[adcVal]);
       break;
-  }  
+  }
 
   // next time we're dealing with a different channel; calculate which one:
   adcNum++;
@@ -151,7 +172,7 @@ ISR(TIM0_COMPA_vect)
 {
   // useful debug indicator to see if the sample rate is correct
   // PORTB ^= 1;
-  
+
   // increment the phase counter
   phase += pi;
 
@@ -179,4 +200,3 @@ ISR(TIM0_COMPA_vect)
   // invert the wave for the second half
   OSCOUTREG = p < WTSIZE ? -s : s;
 }
-
