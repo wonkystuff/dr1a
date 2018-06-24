@@ -1,8 +1,25 @@
-/*
- * main.c (dr1.a remake)
+/* dr1.a - firmware for a minimal drone-synth (or VCDO) for the WonkyStuff
+ * 'core1' board.
  *
- * Created: 04/06/2018
- * Author: johna
+ *   main.c (setup and idle loop functions)
+ *
+ * Copyright (C) 2017-2018  John A. Tuffen
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Questions/queries can be directed to info@wonkystuff.net
+ *
  */
 
 #include "calc.h"
