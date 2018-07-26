@@ -112,8 +112,6 @@ uint8_t rnd()
   return r;
 }
 
-#define DATAWHEEL (1)
-
 // There are no real time constraints here, this is an idle loop after
 // all...
 void loop()
