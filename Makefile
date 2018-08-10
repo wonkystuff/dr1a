@@ -4,6 +4,12 @@ COMPILE    = avr-gcc -save-temps=obj -Wall -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 OBJS       = main.o calc.o isr.o
 OUTNAME    := $(notdir $(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST))))))
 
+ifdef RESET_ACTIVE
+EXTRA_FLAGS = -DRESET_ACTIVE
+else
+EXTRA_FLAGS =
+endif
+
 all: $(OUTNAME).bin Makefile
 
 $(OUTNAME).bin: $(OUTNAME).elf
@@ -21,7 +27,7 @@ clean:
 	rm -f *.elf *.bin *.hex *.map *.eep
 
 $(OUTNAME).elf: $(OBJS)
-	$(COMPILE)  -Wall -Wextra -O2  -Wl,--gc-sections -Wl,-Map,$(basename $@).map -o $@ $^
+	$(COMPILE) -Wall -Wextra -O2  -Wl,--gc-sections -Wl,-Map,$(basename $@).map -o $@ $^
 	avr-size $@ -C --mcu=$(DEVICE)
 
 main.c: calc.h
@@ -40,4 +46,4 @@ flashfuse: fuse.txt
 	minipro -c config -p $(DEVICE) -w $^
 
 %.o : %.c
-	$(COMPILE)  -O2 -c $< -o $@
+	$(COMPILE) $(EXTRA_FLAGS) -O2 -c $< -o $@
