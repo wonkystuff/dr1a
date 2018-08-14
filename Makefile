@@ -6,8 +6,16 @@ OUTNAME    := $(notdir $(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_L
 
 ifdef RESET_ACTIVE
 EXTRA_FLAGS = -DRESET_ACTIVE
+fuse.txt:
+	echo "fuses_lo = 0x00e2" > fuse.txt
+	echo "fuses_hi = 0x00D7" >> fuse.txt
+	echo "lock_byte = 0x00ff" >> fuse.txt
 else
 EXTRA_FLAGS =
+fuse.txt:
+	echo "fuses_lo = 0x00e2" > fuse.txt
+	echo "fuses_hi = 0x0057" >> fuse.txt
+	echo "lock_byte = 0x00ff" >> fuse.txt
 endif
 
 all: $(OUTNAME).bin Makefile
@@ -25,6 +33,7 @@ clean:
 	rm -f calc.c calc.h
 	rm -f *.o *.s *.i
 	rm -f *.elf *.bin *.hex *.map *.eep
+	rm -f fuse.txt
 
 $(OUTNAME).elf: $(OBJS)
 	$(COMPILE) -Wall -Wextra -O2  -Wl,--gc-sections -Wl,-Map,$(basename $@).map -o $@ $^
