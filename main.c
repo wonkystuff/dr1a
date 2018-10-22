@@ -141,7 +141,7 @@ void loop()
 #endif
       // Perturb the main waveform randomly, but with a degree
       // of control
-      if (adcVal > 16)      // give us a bit of a dead zone
+      if (adcVal > 32)      // give us a bit of a dead zone
       {
         if (--perturb == 0)
         {
