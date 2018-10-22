@@ -21,6 +21,7 @@
 
 #include "calc.h"
 #define NUM_ADCS (4)
+#define RESET_ACTIVE (1)  // we're programming via Arduino, so the reset better be active!
 
 // Base-timer is running at 8MHz
 #define F_TIM (8000000L)
@@ -126,20 +127,34 @@ void loop()
 
   switch(adcNum)
   {
-    case 0: // reduced range ~ 512-1023
-
+    case 0:  // ADC 0 is on physical pin 1
+#ifdef RESET_ACTIVE
+      // The reset pin is active here, we only have half of the range
+      adcVal &= 0x1ff;
+      // Shift the adcVal into 8 bits
+      adcVal >>= 1;
+#warning reset active
+#else
+      // The reset pin is inactive here, so we can use the full range
+      adcVal = adcVal >> 2; // move into 8 bits
+#warning reset inactive
+#endif
       // Perturb the main waveform randomly, but with a degree
       // of control
-      if (adcVal > 768) {
+      if (adcVal > 32)      // give us a bit of a dead zone
+      {
         if (--perturb == 0)
         {
           perturb = rnd();
-          if (perturb < (adcVal-768)) // shift adcVal into 8 bit range
+          if (perturb < adcVal)
           {
             ws = perturb;
-            //phase = 0;
           }
         }
+      }
+      else
+      {
+        ws=0; // reset the wave-perturbation so that the weveform-select is sane again…
       }
       break;
     case 1:
