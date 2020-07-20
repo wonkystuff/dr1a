@@ -1,22 +1,36 @@
-DEVICE     = attiny85
-CLOCK      = 8000000
+DEVICE      = attiny85
+ifdef CLOCK16
+EXTRA_FLAGS = -DSIXTEEN
+CLOCK       = 16000000
+else
+EXTRA_FLAGS =
+CLOCK       =  8000000
+endif
+ifdef DEBUG
+EXTRA_FLAGS += -DDEBUG
+endif
+
+ifdef RESET_ACTIVE
+EXTRA_FLAGS += -DRESET_ACTIVE
+endif
+
 COMPILE    = avr-gcc -save-temps=obj -Wall -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 OBJS       = main.o calc.o isr.o
 OUTNAME    := $(notdir $(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST))))))
 
-ifdef RESET_ACTIVE
-EXTRA_FLAGS = -DRESET_ACTIVE
-fuse.txt:
-	echo "fuses_lo = 0x00e2" > fuse.txt
-	echo "fuses_hi = 0x00D7" >> fuse.txt
-	echo "lock_byte = 0x00ff" >> fuse.txt
+fuse.txt: Makefile
+ifdef CLOCK16 
+	echo "fuses_lo = 0x00f1" > fuse.txt
 else
-EXTRA_FLAGS =
-fuse.txt:
 	echo "fuses_lo = 0x00e2" > fuse.txt
-	echo "fuses_hi = 0x0057" >> fuse.txt
-	echo "lock_byte = 0x00ff" >> fuse.txt
 endif
+
+ifdef RESET_ACTIVE
+	echo "fuses_hi = 0x00D7" >> fuse.txt
+else
+	echo "fuses_hi = 0x0057" >> fuse.txt
+endif
+	echo "lock_byte = 0x00ff" >> fuse.txt
 
 all: $(OUTNAME).bin Makefile
 

@@ -25,8 +25,13 @@
 #include "calc.h"
 #define NUM_ADCS (4)
 
+#ifdef SIXTEEN
+// Base-timer is running at 16MHz
+#define F_TIM (16000000L)
+#else
 // Base-timer is running at 8MHz
 #define F_TIM (8000000L)
+#endif
 
 // Remember(!) the input clock is 64MHz, therefore all rates
 // are relative to that.
@@ -34,14 +39,20 @@
 // they don't change after compile time
 #if ((F_TIM/(SRATE)) < 255)
 #define T1_MATCH ((F_TIM/(SRATE))-1)
-#define T1_PRESCALE _BV(CS00)  //prescaler clk/1 (i.e. 8MHz)
+#define T1_PRESCALE _BV(CS00)  //prescaler clk/1 (F_TIM)
 #else
+#if (((F_TIM/8L)/(SRATE)) < 255)
 #define T1_MATCH (((F_TIM/8L)/(SRATE))-1)
-#define T1_PRESCALE _BV(CS01)  //prescaler clk/8 (i.e. 1MHz)
+#define T1_PRESCALE _BV(CS01)  //prescaler clk/8 (F_TIM/8)
+#else
+#if (((F_TIM/256L)/(SRATE)) < 255)
+#define T1_MATCH (((F_TIM/256L)/(SRATE))-1)
+#define T1_PRESCALE _BV(CS02)  //prescaler clk/256 (F_TIM/256)
+#else
+#error SRATE is too low
 #endif
-
-
-#define OSCOUTREG (OCR1A)
+#endif
+#endif
 
 const uint8_t     *waves[5];  // choice of wavetable
 const uint8_t     *wave1;     // which wavetable will this oscillator use?
@@ -82,7 +93,7 @@ setup()
 
   TCCR0A = _BV(WGM01);        // CTC Mode
   TCCR0B = T1_PRESCALE;
-  OCR0A = T1_MATCH;           // calculated match value
+  OCR0A  = T1_MATCH;           // calculated match value
   TIMSK |= _BV(OCIE0A);
 
   DIDR0 = _BV(ADC0D) | _BV(ADC1D) | _BV(ADC2D) | _BV(ADC3D);  // disable digital pin attached to ADC channels
@@ -129,15 +140,16 @@ void loop()
   {
     case 0:  // ADC 0 is on physical pin 1
 #ifdef RESET_ACTIVE
-      // The reset pin is active here, we only have half of the range
-      adcVal &= 0x1ff;
-      // Shift the adcVal into 8 bits
-      adcVal >>= 1;
-#warning reset active
+      // The reset pin is active here, we only have half of the range (~512-1023)
+      if (adcVal < 512)
+      {
+          adcVal = 512;
+      }
+      adcVal -= 512;        // now we have 0-511
+      adcVal = adcVal >> 1; // move into 8 bits 0-255
 #else
       // The reset pin is inactive here, so we can use the full range
       adcVal = adcVal >> 2; // move into 8 bits
-#warning reset inactive
 #endif
       // Perturb the main waveform randomly, but with a degree
       // of control
@@ -152,6 +164,11 @@ void loop()
           }
         }
       }
+      else
+      {
+          ws = 0;       // reset wave to a known state
+      }
+
       break;
     case 1:   // ADC 1 is on physical pin 7
       waveSelect = (ws + (adcVal >> 7)) & 0x07;          // gives us 0-7

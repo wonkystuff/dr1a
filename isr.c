@@ -35,8 +35,10 @@ extern uint16_t          pi_sync;    // sync oscillator current phase increment 
 // deal with oscillator
 ISR(TIM0_COMPA_vect)
 {
-  // useful debug indicator to see if the sample rate is correct
-  // PORTB ^= 1;
+  static uint8_t sample = 0;
+
+  // Output the sample first so that jitter is minimised
+  OSCOUTREG = sample;
 
   // increment the phase counter
   phase += pi;
@@ -45,6 +47,7 @@ ISR(TIM0_COMPA_vect)
   phase_sync += pi_sync;
   if (phase_sync < old_sync)
   {
+    PORTB ^= 1;     // Sub-oscillator
     phase = 0;
   }
 
@@ -63,5 +66,5 @@ ISR(TIM0_COMPA_vect)
   uint8_t s = s1 + s2;
 
   // invert the wave for the second half
-  OSCOUTREG = p < WTSIZE ? -s : s;
+  sample = p < WTSIZE ? -s : s;
 }
