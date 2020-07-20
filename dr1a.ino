@@ -128,13 +128,12 @@ void loop()
     case 0:  // ADC 0 is on physical pin 1
 #ifdef RESET_ACTIVE
       // The reset pin is active here, we only have half of the range
-      if (adcVal > 511)
+      if (adcVal < 512)
       {
-        adcVal = 511;
+          adcVal = 512;
       }
-        
-      // Shift the adcVal into 8 bits
-      adcVal >>= 1;
+      adcVal -= 512;        // now we have 0-511
+      adcVal = adcVal >> 1; // move into 8 bits 0-255
 #warning reset active
 #else
       // The reset pin is inactive here, so we can use the full range
@@ -143,7 +142,7 @@ void loop()
 #endif
       // Perturb the main waveform randomly, but with a degree
       // of control
-      if (adcVal > 32)      // give us a bit of a dead zone
+      if (adcVal > 16)      // give us a bit of a dead zone
       {
         if (--perturb == 0)
         {
