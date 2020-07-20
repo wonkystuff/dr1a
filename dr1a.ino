@@ -128,7 +128,11 @@ void loop()
     case 0:  // ADC 0 is on physical pin 1
 #ifdef RESET_ACTIVE
       // The reset pin is active here, we only have half of the range
-      adcVal &= 0x1ff;
+      if (adcVal > 511)
+      {
+        adcVal = 511;
+      }
+        
       // Shift the adcVal into 8 bits
       adcVal >>= 1;
 #warning reset active
@@ -183,9 +187,6 @@ void loop()
 // deal with oscillator
 ISR(TIM0_COMPA_vect)
 {
-  // useful debug indicator to see if the sample rate is correct
-  // PORTB ^= 1;
-
   // increment the phase counter
   phase += pi;
 
@@ -193,6 +194,8 @@ ISR(TIM0_COMPA_vect)
   phase_sync += pi_sync;
   if (phase_sync < old_sync)
   {
+    // Sub oscillator output
+    PORTB ^= 1;
     phase = 0;
   }
 
