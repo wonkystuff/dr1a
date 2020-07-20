@@ -83,7 +83,7 @@ void setup()
 
   TCCR0A = _BV(WGM01);        // CTC Mode
   TCCR0B = T1_PRESCALE;
-  OCR0A = T1_MATCH;           // calculated match value
+  OCR0A  = T1_MATCH;           // calculated match value
   TIMSK |= _BV(OCIE0A);
 
   ///////////////////////////////////////////////
@@ -126,7 +126,6 @@ void loop()
   switch(adcNum)
   {
     case 0:  // ADC 0 is on physical pin 1
-#ifdef RESET_ACTIVE
       // The reset pin is active here, we only have half of the range
       if (adcVal < 512)
       {
@@ -134,12 +133,7 @@ void loop()
       }
       adcVal -= 512;        // now we have 0-511
       adcVal = adcVal >> 1; // move into 8 bits 0-255
-#warning reset active
-#else
-      // The reset pin is inactive here, so we can use the full range
-      adcVal = adcVal >> 2; // move into 8 bits
-#warning reset inactive
-#endif
+
       // Perturb the main waveform randomly, but with a degree
       // of control
       if (adcVal > 16)      // give us a bit of a dead zone
@@ -159,7 +153,7 @@ void loop()
       }
       break;
     case 1:
-      waveSelect = (ws + (adcVal >> 7)) & 0x07;          // gives us 0-7
+      waveSelect = (ws + (adcVal >> 7)) & 0x07;             // gives us 0-7
       wave1 = waves[waveSelect >> 1];                       // 0-3
       wave2 = waves[(waveSelect >> 1) + (waveSelect & 1)];  // 0-4
       break;
